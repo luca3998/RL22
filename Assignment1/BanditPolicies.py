@@ -15,16 +15,23 @@ class EgreedyPolicy:
     def __init__(self, n_actions=10):
         self.n_actions = n_actions
         # TO DO: Add own code
+        self.q_table = np.zeros(n_actions)
+        self.counts = np.zeros(n_actions)
         pass
         
     def select_action(self, epsilon):
         # TO DO: Add own code
-        a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
+        print('epsilon:', epsilon)
+        if np.random.random() < epsilon:
+            a = np.random.randint(0,self.n_actions)
+        else:
+            a = np.argmax(self.q_table)
+        print('action, ', a)
         return a
         
     def update(self,a,r):
-        # TO DO: Add own code
-        pass
+        self.counts[a] += 1
+        self.q_table[a] += (1 / self.counts[a]) * (r - self.q_table[a])
 
 class OIPolicy:
 
