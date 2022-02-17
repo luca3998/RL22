@@ -7,6 +7,7 @@ Bachelor AI, Leiden University, The Netherlands
 2021
 By Thomas Moerland
 """
+from mimetypes import init
 import numpy as np
 from BanditEnvironment import BanditEnvironment
 
@@ -37,17 +38,20 @@ class OIPolicy:
 
     def __init__(self, n_actions=10, initial_value=0.0, learning_rate=0.1):
         self.n_actions = n_actions
+        self.q_table = np.full(self.n_actions, initial_value)
+        self.learning_rate = learning_rate
         # TO DO: Add own code
         pass
         
     def select_action(self):
         # TO DO: Add own code
-        a = np.random.randint(0,self.n_actions) # Replace this with correct action selection
+        a = np.argmax(self.q_table) # Replace this with correct action selection
         return a
         
     def update(self,a,r):
         # TO DO: Add own code
-        pass
+        self.q_table[a] += self.learning_rate * (r - self.q_table[a])
+        # pass
 
 class UCBPolicy:
 
