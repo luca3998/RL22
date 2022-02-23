@@ -20,12 +20,10 @@ class EgreedyPolicy:
         pass
         
     def select_action(self, epsilon):
-#         print('epsilon:', epsilon)
         if np.random.random() < epsilon:
             a = np.random.randint(0,self.n_actions)
         else:
             a = np.argmax(self.q_table)
-#         print('action, ', a)
         return a
         
     def update(self,a,r):
@@ -41,13 +39,10 @@ class OIPolicy:
         pass
         
     def select_action(self):
-        a = np.argmax(self.q_table) # Replace this with correct action selection
-        return a
+        return np.argmax(self.q_table)
         
     def update(self,a,r):
-        # TO DO: Add own code
         self.q_table[a] += self.learning_rate * (r - self.q_table[a])
-        # pass
 
 class UCBPolicy:
 

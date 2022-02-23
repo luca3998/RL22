@@ -25,11 +25,18 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, pol
                 pi.update(a,r) # update policy
                 # print("Test e-greedy policy with action {}, received reward {}".format(a,r))
     elif policy == 'oi':
-        pass
+        for rep in range(n_repetitions):
+            env = BanditEnvironment(n_actions=n_actions) # Initialize environment    
+            pi = OIPolicy(n_actions=n_actions, initial_value=2.0) # Initialize policy
+            for timestep in range(n_timesteps):
+                a = pi.select_action() # select action
+                r = env.act(a) # sample reward
+                avg_r_per_timestep[timestep] += (r - avg_r_per_timestep[timestep])/(rep+1)
+                pi.update(a,r) # update policy
     elif policy == 'ucb':
         pass
     else:
-        raise Exception("Policy error, please pass one of the following to the policy argument 'egreedy', 'oi' or 'ucb' ") 
+        raise Exception("Policy error, please pass one of the following to the policy argument: 'egreedy', 'oi' or 'ucb' ") 
     return avg_r_per_timestep
     
         
@@ -48,7 +55,15 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     egreedy_plot.save(name='egreedy.png')
     
     # Assignment 2: Optimistic init
-    run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='oi')
+    avg_rewards_oi = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='oi')
+    
+    egreedy_plot = LearningCurvePlot(title='optimistic init plot')
+    egreedy_plot.add_curve(avg_rewards_oi)
+    
+    smoothed_line = smooth(y=avg_rewards_oi, window=smoothing_window)
+    egreedy_plot.add_curve(smoothed_line)
+
+    egreedy_plot.save(name='oi.png')
     
     
     # Assignment 3: UCB
