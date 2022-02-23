@@ -34,7 +34,14 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, pol
                 avg_r_per_timestep[timestep] += (r - avg_r_per_timestep[timestep])/(rep+1)
                 pi.update(a,r) # update policy
     elif policy == 'ucb':
-        pass
+        for rep in range(n_repetitions):
+            env = BanditEnvironment(n_actions=n_actions) # Initialize environment    
+            pi =UCBPolicy(n_actions=n_actions) # Initialize policy
+            for timestep in range(n_timesteps):
+                a = pi.select_action(c=0.1, t=timestep) # select action
+                r = env.act(a) # sample reward
+                avg_r_per_timestep[timestep] += (r - avg_r_per_timestep[timestep])/(rep+1)
+                pi.update(a,r) # update policy
     else:
         raise Exception("Policy error, please pass one of the following to the policy argument: 'egreedy', 'oi' or 'ucb' ") 
     return avg_r_per_timestep
@@ -67,7 +74,15 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     
     
     # Assignment 3: UCB
-    run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='ucb')
+    avg_rewards_ucb = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='ucb')
+    
+    egreedy_plot = LearningCurvePlot(title='UCB plot')
+    egreedy_plot.add_curve(avg_rewards_ucb)
+    
+    smoothed_line = smooth(y=avg_rewards_ucb, window=smoothing_window)
+    egreedy_plot.add_curve(smoothed_line)
+
+    egreedy_plot.save(name='ucb.png')
     
     # Assignment 4: Comparison
 
