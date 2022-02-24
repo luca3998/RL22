@@ -46,50 +46,38 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, pol
         raise Exception("Policy error, please pass one of the following to the policy argument: 'egreedy', 'oi' or 'ucb' ") 
     return avg_r_per_timestep
     
-        
+
+    
+def plot_avg_reward(y, name='untitled.png',smoothing=True, save=True):
+    egreedy_plot = LearningCurvePlot(title=name)
+    egreedy_plot.add_curve(y)
+    if smoothing:
+        smoothed_line = smooth(y=y, window=smoothing_window)
+        egreedy_plot.add_curve(smoothed_line)
+    if save:
+        egreedy_plot.save(name='egreedy.png')
+    
+
 def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     #To Do: Write all your experiment code here
     
     # Assignment 1: e-greedy
     avg_rewards_egreedy = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='egreedy')
     
-    egreedy_plot = LearningCurvePlot(title='egreedy plot')
-    egreedy_plot.add_curve(avg_rewards_egreedy)
-    
-    smoothed_line = smooth(y=avg_rewards_egreedy, window=smoothing_window)
-    egreedy_plot.add_curve(smoothed_line)
-
-    egreedy_plot.save(name='egreedy.png')
+    plot_avg_reward(y=avg_rewards_egreedy, name='egreedy.png')
     
     # Assignment 2: Optimistic init
     avg_rewards_oi = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='oi')
     
-    egreedy_plot = LearningCurvePlot(title='optimistic init plot')
-    egreedy_plot.add_curve(avg_rewards_oi)
-    
-    smoothed_line = smooth(y=avg_rewards_oi, window=smoothing_window)
-    egreedy_plot.add_curve(smoothed_line)
-
-    egreedy_plot.save(name='oi.png')
+    plot_avg_reward(y=avg_rewards_oi, name='oi.png')
     
     
     # Assignment 3: UCB
     avg_rewards_ucb = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='ucb')
     
-    egreedy_plot = LearningCurvePlot(title='UCB plot')
-    egreedy_plot.add_curve(avg_rewards_ucb)
-    
-    smoothed_line = smooth(y=avg_rewards_ucb, window=smoothing_window)
-    egreedy_plot.add_curve(smoothed_line)
-
-    egreedy_plot.save(name='ucb.png')
-    
-    # Assignment 4: Comparison
-
-    # print("test")
-    
-    pass
-
+    plot_avg_reward(y=avg_rewards_oi, name='ucb.png')
+     
+   
 if __name__ == '__main__':
     # experiment settings
     n_actions = 10
