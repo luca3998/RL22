@@ -75,7 +75,16 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     # Assignment 3: UCB
     avg_rewards_ucb = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='ucb')
     
-    plot_avg_reward(y=avg_rewards_oi, name='ucb.png')
+    plot_avg_reward(y=avg_rewards_ucb, name='ucb.png')
+
+    # Comparison of the three methods
+    comparison_plot = ComparisonPlot(title="Comparison of the three methods")
+    x = np.arange(n_timesteps)
+    comparison_plot.add_curve(x,y=smooth(y=avg_rewards_egreedy,window=smoothing_window),label="e-greedy")
+    comparison_plot.add_curve(x,y=smooth(y=avg_rewards_oi,window=smoothing_window),label="OI")
+    comparison_plot.add_curve(x,y=smooth(y=avg_rewards_ucb,window=smoothing_window),label="UCB")
+    comparison_plot.save(name="comparison.png")
+
      
    
 if __name__ == '__main__':
