@@ -7,19 +7,20 @@ Bachelor AI, Leiden University, The Netherlands
 2021
 By Thomas Moerland
 """
+from unicodedata import name
 import numpy as np
 from BanditEnvironment import BanditEnvironment
 from BanditPolicies import EgreedyPolicy, OIPolicy, UCBPolicy
 from Helper import LearningCurvePlot, ComparisonPlot, smooth
  
-def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='egreedy'):
+def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, param_value, policy='egreedy'):
     avg_r_per_timestep = np.zeros(n_timesteps)
     if policy == 'egreedy':
         for rep in range(n_repetitions):
             env = BanditEnvironment(n_actions=n_actions) # Initialize environment    
             pi = EgreedyPolicy(n_actions=n_actions) # Initialize policy
             for timestep in range(n_timesteps):
-                a = pi.select_action(epsilon=0.5) # select action
+                a = pi.select_action(epsilon=param_value) # select action
                 r = env.act(a) # sample reward
                 avg_r_per_timestep[timestep] += (r - avg_r_per_timestep[timestep])/(rep+1)
                 pi.update(a,r) # update policy
@@ -27,7 +28,7 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, pol
     elif policy == 'oi':
         for rep in range(n_repetitions):
             env = BanditEnvironment(n_actions=n_actions) # Initialize environment    
-            pi = OIPolicy(n_actions=n_actions, initial_value=2.0) # Initialize policy
+            pi = OIPolicy(n_actions=n_actions, initial_value=param_value) # Initialize policy
             for timestep in range(n_timesteps):
                 a = pi.select_action() # select action
                 r = env.act(a) # sample reward
@@ -38,7 +39,7 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, pol
             env = BanditEnvironment(n_actions=n_actions) # Initialize environment    
             pi =UCBPolicy(n_actions=n_actions) # Initialize policy
             for timestep in range(n_timesteps):
-                a = pi.select_action(c=0.1, t=timestep) # select action
+                a = pi.select_action(c=param_value, t=timestep) # select action
                 r = env.act(a) # sample reward
                 avg_r_per_timestep[timestep] += (r - avg_r_per_timestep[timestep])/(rep+1)
                 pi.update(a,r) # update policy
@@ -62,19 +63,35 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     #To Do: Write all your experiment code here
     
     # Assignment 1: e-greedy
-    avg_rewards_egreedy = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='egreedy')
-    
+    EPSILONS = [0.01,0.05,0.1,0.25]
+    all_avg_rewards_egreedy = np.empty((0,n_timesteps), dtype=object)
+    epsilon_comparison_plot = ComparisonPlot(title="Comparison of rewards per Epsilon value")
+    x=np.arange(n_timesteps)
+    for epsilon in EPSILONS:
+        avg_rewards_egreedy = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='egreedy',param_value=epsilon)
+        epsilon_comparison_plot.add_curve(x,y=smooth(avg_rewards_egreedy,window=smoothing_window),label="Epsilon %s" % epsilon)
+        all_avg_rewards_egreedy = np.append(all_avg_rewards_egreedy, [avg_rewards_egreedy])
+    epsilon_comparison_plot.save(name="testComp.png")
+
     plot_avg_reward(y=avg_rewards_egreedy, name='egreedy.png')
     
     # Assignment 2: Optimistic init
-    avg_rewards_oi = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='oi')
-    
+    INITIAL_VALUES = [0.1,0.5,1.0,2.0]
+    all_avg_rewards_oi = np.empty((0,n_timesteps), dtype=object)
+    for initial_value in INITIAL_VALUES:
+        avg_rewards_oi = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='oi', param_value=initial_value)  
+        all_avg_rewards_oi = np.append(all_avg_rewards_oi, [avg_rewards_oi])
+
     plot_avg_reward(y=avg_rewards_oi, name='oi.png')
     
     
     # Assignment 3: UCB
-    avg_rewards_ucb = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='ucb')
-    
+    C_VALUES = [0.01,0.05,0.1,0.25,0.5,1.0]
+    all_avg_rewards_ucb = np.empty((0,n_timesteps), dtype=object)
+    for c_value in C_VALUES:
+        avg_rewards_ucb = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='ucb', param_value=c_value)
+        all_avg_rewards_ucb = np.append(all_avg_rewards_ucb, [avg_rewards_ucb])
+        
     plot_avg_reward(y=avg_rewards_ucb, name='ucb.png')
 
     # Comparison of the three methods
