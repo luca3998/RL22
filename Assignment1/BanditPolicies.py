@@ -53,7 +53,11 @@ class UCBPolicy:
         pass
     
     def select_action(self, c, t):
-        return np.argmax(self.q_table + c * (np.sqrt(np.log(t)/self.q_table)))
+        # return np.argmax(self.q_table + c * (np.sqrt(np.log(t)/self.q_table)))
+        if not np.all(self.counts):
+            return np.argmax(self.counts == 0)
+        else:
+            return np.argmax(self.q_table + c * (np.sqrt(np.log(t)/self.counts)))
         
     def update(self,a,r):
         self.counts[a] += 1

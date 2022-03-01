@@ -69,18 +69,21 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     x=np.arange(n_timesteps)
     for epsilon in EPSILONS:
         avg_rewards_egreedy = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='egreedy',param_value=epsilon)
-        epsilon_comparison_plot.add_curve(x,y=smooth(avg_rewards_egreedy,window=smoothing_window),label="Epsilon %s" % epsilon)
-        all_avg_rewards_egreedy = np.append(all_avg_rewards_egreedy, [avg_rewards_egreedy])
-    epsilon_comparison_plot.save(name="testComp.png")
+        epsilon_comparison_plot.add_curve(x,y=smooth(avg_rewards_egreedy,window=smoothing_window),label="Epsilon = %s" % epsilon)
+        all_avg_rewards_egreedy = np.append(all_avg_rewards_egreedy, [avg_rewards_egreedy],axis=0)
+    epsilon_comparison_plot.save(name="epsilon_comparison.png")
 
     plot_avg_reward(y=avg_rewards_egreedy, name='egreedy.png')
     
     # Assignment 2: Optimistic init
     INITIAL_VALUES = [0.1,0.5,1.0,2.0]
     all_avg_rewards_oi = np.empty((0,n_timesteps), dtype=object)
+    oi_comparison_plot = ComparisonPlot(title="Comparison of rewards per initial value")
     for initial_value in INITIAL_VALUES:
         avg_rewards_oi = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='oi', param_value=initial_value)  
-        all_avg_rewards_oi = np.append(all_avg_rewards_oi, [avg_rewards_oi])
+        oi_comparison_plot.add_curve(x,y=smooth(avg_rewards_oi,window=smoothing_window),label="Initial value = %s" % initial_value)
+        all_avg_rewards_oi = np.append(all_avg_rewards_oi, [avg_rewards_oi],axis=0)
+    oi_comparison_plot.save(name="oi_comparison.png")
 
     plot_avg_reward(y=avg_rewards_oi, name='oi.png')
     
@@ -88,18 +91,28 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     # Assignment 3: UCB
     C_VALUES = [0.01,0.05,0.1,0.25,0.5,1.0]
     all_avg_rewards_ucb = np.empty((0,n_timesteps), dtype=object)
+    ucb_comparison_plot = ComparisonPlot(title="Comparison of rewards per c value")
     for c_value in C_VALUES:
         avg_rewards_ucb = run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, policy='ucb', param_value=c_value)
-        all_avg_rewards_ucb = np.append(all_avg_rewards_ucb, [avg_rewards_ucb])
-        
+        ucb_comparison_plot.add_curve(x,y=smooth(avg_rewards_ucb,window=smoothing_window),label="C value = %s" % c_value)
+        all_avg_rewards_ucb = np.append(all_avg_rewards_ucb, [avg_rewards_ucb],axis=0)
+    ucb_comparison_plot.save(name="ucb_comparison.png")
     plot_avg_reward(y=avg_rewards_ucb, name='ucb.png')
 
     # Comparison of the three methods
+    # comparison_plot = ComparisonPlot(title="Comparison of the three methods")
+    # x = np.arange(n_timesteps)
+    # comparison_plot.add_curve(x,y=smooth(y=avg_rewards_egreedy,window=smoothing_window),label="e-greedy")
+    # comparison_plot.add_curve(x,y=smooth(y=avg_rewards_oi,window=smoothing_window),label="OI")
+    # comparison_plot.add_curve(x,y=smooth(y=avg_rewards_ucb,window=smoothing_window),label="UCB")
+    # comparison_plot.save(name="comparison.png")
+
+    # This creates the graph similar to the one in the book:
     comparison_plot = ComparisonPlot(title="Comparison of the three methods")
     x = np.arange(n_timesteps)
-    comparison_plot.add_curve(x,y=smooth(y=avg_rewards_egreedy,window=smoothing_window),label="e-greedy")
-    comparison_plot.add_curve(x,y=smooth(y=avg_rewards_oi,window=smoothing_window),label="OI")
-    comparison_plot.add_curve(x,y=smooth(y=avg_rewards_ucb,window=smoothing_window),label="UCB")
+    comparison_plot.add_curve(x=EPSILONS,y=all_avg_rewards_egreedy.mean(axis=1),label="e-greedy")
+    comparison_plot.add_curve(x=INITIAL_VALUES,y=all_avg_rewards_oi.mean(axis=1),label="OI")
+    comparison_plot.add_curve(x=C_VALUES,y=all_avg_rewards_ucb.mean(axis=1),label="UCB")
     comparison_plot.save(name="comparison.png")
 
      
