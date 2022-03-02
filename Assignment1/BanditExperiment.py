@@ -13,7 +13,19 @@ from BanditEnvironment import BanditEnvironment
 from BanditPolicies import EgreedyPolicy, OIPolicy, UCBPolicy
 from Helper import LearningCurvePlot, ComparisonPlot, smooth
  
-def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, param_value, policy='egreedy'):
+def run_repetitions(n_actions, n_timesteps, n_repetitions, param_value=0.1, policy='egreedy'):
+    """
+    Perform a bandit experiment using a given policy for n_repetitions consisting of n_timesteps for n_actions
+
+    :param n_actions: Cardinality of the action space
+    :param n_timesteps: Number of timesteps per repetition (experiment trial)
+    :param n_repetitions: Number of repetitions, how often an experiment should be run
+    :param param_value: Pass a float for epsilon, optimistic initialization or UCB (default is 0.1)
+    :param policy: The policy the reinforcement algorithm will use (default is 'egreedy')
+    :returns avg_r_per_timestep: A list of of floats which represent the average reward per timestep,
+     with length=n_repetitions
+    :raise ValueError: If the policy param is not one of the following: 'egreedy', 'oi' or 'ucb'
+    """
     avg_r_per_timestep = np.zeros(n_timesteps)
     if policy == 'egreedy':
         for rep in range(n_repetitions):
@@ -24,7 +36,6 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, par
                 r = env.act(a) # sample reward
                 avg_r_per_timestep[timestep] += (r - avg_r_per_timestep[timestep])/(rep+1)
                 pi.update(a,r) # update policy
-                # print("Test e-greedy policy with action {}, received reward {}".format(a,r))
     elif policy == 'oi':
         for rep in range(n_repetitions):
             env = BanditEnvironment(n_actions=n_actions) # Initialize environment    
@@ -44,12 +55,22 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, smoothing_window, par
                 avg_r_per_timestep[timestep] += (r - avg_r_per_timestep[timestep])/(rep+1)
                 pi.update(a,r) # update policy
     else:
-        raise Exception("Policy error, please pass one of the following to the policy argument: 'egreedy', 'oi' or 'ucb' ") 
+        raise ValueError("Policy error, please pass one of the following to the policy argument: 'egreedy', 'oi' or 'ucb' ")
     return avg_r_per_timestep
     
 
     
 def plot_avg_reward(y, name='untitled.png',smoothing=True, save=True):
+    """
+    Plot a graph that shows the learning curve given a certain y
+
+    :param y: A list that contains the y coordinates (average reward per timestep) values that should be plotted
+    :param name: Which file name the plot should have when saved (default is 'untitled.png')
+    :param smoothing: A boolean when True apply a smoothing curve, else not (default is True)
+    :param save: Whether the plot should be saved (default True)
+    """
+    if '.png' not in name:
+        name += '.png'
     egreedy_plot = LearningCurvePlot(title=name)
     egreedy_plot.add_curve(y)
     if smoothing:
@@ -60,7 +81,15 @@ def plot_avg_reward(y, name='untitled.png',smoothing=True, save=True):
     
 
 def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
-    #To Do: Write all your experiment code here
+    """
+    Perform the bandit-experiments for the three different policies (Egreedy, OI and UCB)
+
+    :param n_actions: Cardinality of the action space
+    :param n_timesteps: Number of timesteps per repetition (experiment trial)
+    :param n_repetitions: Number of repetitions, how often an experiment should be run
+    :param smoothing_window: size of the smoothing window
+    :param policy: The policy the reinforcement algorithm will use (default is 'egreedy')
+    """
     
     # Assignment 1: e-greedy
     EPSILONS = [0.01,0.05,0.1,0.25]
