@@ -1,35 +1,25 @@
 # Foobar
+*Authors: Luca Goemans & Sayf El Kaddouri*
 
-Foobar is a Python library for dealing with word pluralization.
+This is the codebase for the experiments of Assignment 1 of ITRL.
 
 ## Installation
 
 Install the conda environment by the following command. Updating the environment can be done by the second line.
+To install the the libraries using pip please look at the third line
 
 ```bash
 conda env create --file conda_env.yml
 conda env update --file conda_env.yml  --prune
+pip install -r requirements.txt
 ```
 
 ## Usage
 
-```python
-import foobar
-
-# returns 'words'
-foobar.pluralize('word')
-
-# returns 'geese'
-foobar.pluralize('goose')
-
-# returns 'phenomenon'
-foobar.singularize('phenomena')
+In order to run the experiments run the experiment file in the Assignment1 folder.
+```bash
+python BanditExperiment.py
 ```
-
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
