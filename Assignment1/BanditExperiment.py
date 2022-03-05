@@ -12,7 +12,8 @@ import numpy as np
 from BanditEnvironment import BanditEnvironment
 from BanditPolicies import EgreedyPolicy, OIPolicy, UCBPolicy
 from Helper import LearningCurvePlot, ComparisonPlot, smooth
- 
+
+
 def run_repetitions(n_actions, n_timesteps, n_repetitions, param_value=0.1, policy='egreedy'):
     """
     Perform a bandit experiment using a given policy for n_repetitions consisting of n_timesteps for n_actions
@@ -59,7 +60,6 @@ def run_repetitions(n_actions, n_timesteps, n_repetitions, param_value=0.1, poli
     return avg_r_per_timestep
     
 
-    
 def plot_avg_reward(y, name='untitled.png',smoothing=True, save=True):
     """
     Plot a graph that shows the learning curve given a certain y
@@ -115,8 +115,7 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     oi_comparison_plot.save(name="oi_comparison.png")
 
     plot_avg_reward(y=avg_rewards_oi, name='oi.png')
-    
-    
+
     # Assignment 3: UCB
     C_VALUES = [0.01,0.05,0.1,0.25,0.5,1.0]
     all_avg_rewards_ucb = np.empty((0,n_timesteps), dtype=object)
@@ -144,8 +143,35 @@ def experiment(n_actions, n_timesteps, n_repetitions, smoothing_window):
     comparison_plot.add_curve(x=C_VALUES,y=all_avg_rewards_ucb.mean(axis=1),label="UCB")
     comparison_plot.save(name="comparison.png")
 
-     
-   
+    # Check what the optimal hyperparameters are:
+    # E-greedy
+    egreedy_argmax = np.argmax(all_avg_rewards_egreedy.mean(axis=1))
+    print('Best epsilon value:', EPSILONS[egreedy_argmax])
+
+
+    # OI
+    oi_argmax = np.argmax(all_avg_rewards_oi.mean(axis=1))
+    print('Best init value:', INITIAL_VALUES[oi_argmax])
+
+    # UCB
+    ucb_argmax = np.argmax(all_avg_rewards_ucb.mean(axis=1))
+    print('Best c value:', C_VALUES[ucb_argmax])
+
+    # Plot all the optimal hyperparameters and their learning curves
+    optimal_hyperparameters_plots = LearningCurvePlot(
+        title='Comparison learning curves of different policies \nusing optimal hyperparameters')
+    # print(all_avg_rewards_egreedy[egreedy_argmax],'with shape:', np.shape(all_avg_rewards_egreedy[egreedy_argmax]))
+    optimal_hyperparameters_plots.add_curve(y=smooth(y=all_avg_rewards_egreedy[egreedy_argmax], window=smoothing_window),
+                                            label="egreedy policy with epsilon = %s" % EPSILONS[egreedy_argmax])
+    optimal_hyperparameters_plots.add_curve(y=smooth(y=all_avg_rewards_oi[oi_argmax], window=smoothing_window),
+                                            label="OI policy with init value = %s" % INITIAL_VALUES[oi_argmax])
+    optimal_hyperparameters_plots.add_curve(y=smooth(y=all_avg_rewards_ucb[ucb_argmax], window=smoothing_window),
+                                            label="UCB policy with c = %s" % C_VALUES[ucb_argmax])
+    optimal_hyperparameters_plots.save(name="comparison_with_optimal_hyperparameters.png")
+
+    ucb_comparison_plot.add_curve(x,y=smooth(avg_rewards_ucb,window=smoothing_window),label="C value = %s" % c_value)
+
+
 if __name__ == '__main__':
     # experiment settings
     n_actions = 10
